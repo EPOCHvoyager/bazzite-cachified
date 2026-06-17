@@ -30,7 +30,8 @@ dnf5 install -y \
 KERNEL_VERSION="$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' kernel-cachyos-lts-lto)"
 
 # Install zenergy. Modified from — https://github.com/ublue-os/akmods/blob/51ea18abf8439fb72eb92047aec7d43f73b555e7/build_files/extra/build-kmod-zenergy.sh
-curl -LsSf -o https://raw.githubusercontent.com/terrapkg/packages/f${VERSION}/anda/terra/release/terra.repo /etc/yum.repos.d/terra.repo
+curl -LsSf -o /etc/yum.repos.d/terra.repo
+    "https://raw.githubusercontent.com/terrapkg/packages/f${VERSION}/anda/terra/release/terra.repo"
 curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
     "https://raw.githubusercontent.com/terrapkg/packages/f${RELEASE}/anda/terra/gpg-keys/RPM-GPG-KEY-terra${RELEASE}"
 rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
@@ -43,7 +44,7 @@ akmods --force --kernels "${KERNEL_VERSION}" --kmod zenergy
 depmod -a "${KERNEL_VERSION}"
 
 # Handle vmlinuz placement
-# We check if the files are physically different (-ef) before attempting a copy
+# Check if the files are physically different (-ef) before attempting a copy
 VMLINUZ_SOURCE="/lib/modules/${KERNEL_VERSION}/vmlinuz"
 VMLINUZ_TARGET="/usr/lib/modules/${KERNEL_VERSION}/vmlinuz"
 
