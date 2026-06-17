@@ -4,13 +4,6 @@
 
 set ${CI:+-x} -euo pipefail
 
-# Create a shim to bypass triggering dracut
-pushd /usr/lib/kernel/install.d
-mv 50-dracut.install 50-dracut.install.bak
-printf '%s\n' '#!/bin/sh' 'exit 0' > 50-dracut.install
-chmod +x 50-dracut.install
-popd
-
 # Add kernel repo
 dnf5 copr enable -y bieszczaders/kernel-cachyos
 
