@@ -29,6 +29,9 @@ dnf5 install -y \
 
 KERNEL_VERSION="$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' kernel-cachyos-lts)"
 
+# Generate module dependencies
+depmod -a "${KERNEL_VERSION}"
+
 # Install zenergy. Modified from — https://github.com/ublue-os/akmods/blob/51ea18abf8439fb72eb92047aec7d43f73b555e7/build_files/extra/build-kmod-zenergy.sh
 RELEASE="$(rpm -E '%fedora')"
 ARCH="$(rpm -E '%_arch')"
@@ -45,9 +48,6 @@ dnf5 install -y \
 akmods --force --kernels "${KERNEL_VERSION}" --kmod zenergy
 modinfo /usr/lib/modules/"${KERNEL}"/extra/zenergy/zenergy.ko.xz > /dev/null \
 || (find /var/cache/akmods/zenergy/ -name \*.log -print -exec cat {} \; && exit 1)
-
-# Generate module dependencies
-depmod -a "${KERNEL_VERSION}"
 
 # Handle vmlinuz placement
 # Check if the files are physically different (-ef) before attempting a copy
