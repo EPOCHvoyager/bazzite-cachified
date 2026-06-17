@@ -47,7 +47,7 @@ rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
 
 dnf5 install -y \
     --enablerepo="terra" \
-    akmod-zenergy-*.fc"${RELEASE}"."${ARCH}" \
+    akmod-zenergy-*.fc"${RELEASE}"."${ARCH}"
 mkdir -p /var/tmp
 chmod 1777 /var/tmp
 dnf5 install -y \
