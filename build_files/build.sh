@@ -39,6 +39,7 @@ curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
 rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
 
 dnf5 install -y \
+    --enablerepo="terra" \
     --setopt=tsflags=noscripts \
     akmod-zenergy-*.fc"${RELEASE}"."${ARCH}"
 akmods --force --kernels "${KERNEL_VERSION}" --kmod zenergy
