@@ -1,24 +1,59 @@
 #!/bin/bash
 
+# Modified from — https://github.com/jumpyvi/alchemist/build_files/packages/kernel.sh
+
 set -ouex pipefail
 
-### Install packages
+# Adds the longterm kernel repo
+dnf5 copr enable -y bieszczaders/kernel-cachyos-lto
 
-# Packages can be installed from any enabled yum repo on the image.
-# RPMfusion repos are available by default in ublue main images
-# List of rpmfusion packages can be found here:
-# https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/43/x86_64/repoview/index.html&protocol=https&redirect=1
+# Remove previous kernels
+readarray -t OLD_KERNELS < <(rpm -qa 'kernel-*')
+if (( ${#OLD_KERNELS[@]} )); then
+    rpm -e --justdb --nodeps "${OLD_KERNELS[@]}"
+    dnf5 versionlock delete "${OLD_KERNELS[@]}" || true
+    rm -rf /usr/lib/modules/*
+    rm -rf /lib/modules/*
+fi
 
-# this installs a package from fedora repos
-#dnf5 install -y tmux
+# Install kernel packages (noscripts required for 43+)
+dnf5 install -y \
+    --enablerepo="copr:copr.fedorainfracloud.org:bieszczaders:kernel-cachyos-lto" \
+    --allowerasing \
+    --setopt=tsflags=noscripts \
+    kernel-cachyos-lts-lto \
+    kernel-cachyos-lts-lto-devel-matched \
+    kernel-cachyos-lts-lto-devel \
+    kernel-cachyos-lts-lto-modules \
+    kernel-cachyos-lts-lto-core
 
-# Use a COPR Example:
-#
-# dnf5 -y copr enable ublue-os/staging
-# dnf5 -y install package
-# Disable COPRs so they don't end up enabled on the final image:
-# dnf5 -y copr disable ublue-os/staging
+KERNEL_VERSION="$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' kernel-cachyos-lts-lto)"
 
-#### Example for enabling a System Unit File
+# Generate module dependencies
+depmod -a "${KERNEL_VERSION}"
 
-#systemctl enable podman.socket
+# Handle vmlinuz placement
+# We check if the files are physically different (-ef) before attempting a copy
+VMLINUZ_SOURCE="/lib/modules/${KERNEL_VERSION}/vmlinuz"
+VMLINUZ_TARGET="/usr/lib/modules/${KERNEL_VERSION}/vmlinuz"
+
+if [[ -f "${VMLINUZ_SOURCE}" ]]; then
+    if ! [[ "${VMLINUZ_SOURCE}" -ef "${VMLINUZ_TARGET}" ]]; then
+        mkdir -p "/usr/lib/modules/${KERNEL_VERSION}"
+        cp "${VMLINUZ_SOURCE}" "${VMLINUZ_TARGET}"
+    else
+        echo "vmlinuz already exists at target via symlink, skipping copy."
+    fi
+fi
+
+# Lock kernel packages
+dnf5 versionlock add "kernel-cachyos-lts-lto-${KERNEL_VERSION}" || true
+dnf5 versionlock add "kernel-cachyos-lts-lto-modules-${KERNEL_VERSION}" || true
+
+# Thank you @renner03 for this part
+dracut --no-hostonly \
+  --kver "${KERNEL_VERSION}" \
+  --reproducible -v --add ostree \
+  -f "/usr/lib/modules/${KERNEL_VERSION}/initramfs.img"
+
+chmod 0600 "/lib/modules/${KERNEL_VERSION}/initramfs.img"
