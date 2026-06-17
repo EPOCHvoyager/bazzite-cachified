@@ -4,7 +4,7 @@
 
 set ${CI:+-x} -euo pipefail
 
-# Adds the longterm kernel repo
+# Add kernel repo
 dnf5 copr enable -y bieszczaders/kernel-cachyos-lto
 
 # Remove previous kernels
@@ -30,6 +30,7 @@ dnf5 install -y \
 KERNEL_VERSION="$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' kernel-cachyos-lts-lto)"
 
 # Install zenergy. Modified from — https://github.com/ublue-os/akmods/blob/51ea18abf8439fb72eb92047aec7d43f73b555e7/build_files/extra/build-kmod-zenergy.sh
+RELEASE="$(rpm -E '%fedora')"
 curl -LsSf -o /etc/yum.repos.d/terra.repo \
     "https://raw.githubusercontent.com/terrapkg/packages/f${RELEASE}/anda/terra/release/terra.repo"
 curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
