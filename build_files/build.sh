@@ -46,7 +46,7 @@ dnf5 install -y \
     --setopt=tsflags=noscripts \
     akmod-zenergy-*.fc"${RELEASE}"."${ARCH}"
 akmods --force --kernels "${KERNEL_VERSION}" --kmod zenergy
-modinfo /usr/lib/modules/"${KERNEL}"/extra/zenergy/zenergy.ko.xz > /dev/null \
+modinfo /usr/lib/modules/"${KERNEL_VERSION}"/extra/zenergy/zenergy.ko.xz > /dev/null \
 || (find /var/cache/akmods/zenergy/ -name \*.log -print -exec cat {} \; && exit 1)
 
 # Handle vmlinuz placement
