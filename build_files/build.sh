@@ -42,9 +42,10 @@ dnf5 install -y \
     --enablerepo="terra" \
     --setopt=tsflags=noscripts \
     akmod-zenergy-*.fc"${RELEASE}"."${ARCH}" \
-    gcc-c++
 mkdir -p /var/tmp
 chmod 1777 /var/tmp
+dnf5 install -y \
+    gcc-c++
 akmods --force --kernels "${KERNEL_VERSION}" --kmod zenergy
 modinfo /usr/lib/modules/"${KERNEL_VERSION}"/extra/zenergy/zenergy.ko.xz > /dev/null \
 || (find /var/cache/akmods/zenergy/ -name \*.log -print -exec cat {} \; && exit 1)
