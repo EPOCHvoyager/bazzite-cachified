@@ -70,3 +70,6 @@ dracut --force \
   -f "/usr/lib/modules/${KERNEL_VERSION}/initramfs.img"
 
 chmod 0600 "/lib/modules/${KERNEL_VERSION}/initramfs.img"
+
+rm -f /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:bieszczaders:kernel-cachyos-lto.repo
+rm -f /etc/yum.repos.d/terra.repo
