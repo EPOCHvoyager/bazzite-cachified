@@ -51,7 +51,8 @@ dnf5 versionlock add "kernel-cachyos-lts-lto-${KERNEL_VERSION}" || true
 dnf5 versionlock add "kernel-cachyos-lts-lto-modules-${KERNEL_VERSION}" || true
 
 # Thank you @renner03 for this part
-dracut --no-hostonly \
+dracut --force \
+  --no-hostonly \
   --kver "${KERNEL_VERSION}" \
   --reproducible -v --add ostree \
   -f "/usr/lib/modules/${KERNEL_VERSION}/initramfs.img"
