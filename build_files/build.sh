@@ -38,13 +38,11 @@ curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
     "https://raw.githubusercontent.com/terrapkg/packages/f${RELEASE}/anda/terra/gpg-keys/RPM-GPG-KEY-terra${RELEASE}"
 rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
 
-# Protect against incorrect permissions in tmp dirs which can break akmods build
-chmod 1777 /tmp /var/tmp
-
 dnf5 install -y \
     --enablerepo="terra" \
     --setopt=tsflags=noscripts \
     akmod-zenergy-*.fc"${RELEASE}"."${ARCH}"
+chmod 1777 /var/tmp
 akmods --force --kernels "${KERNEL_VERSION}" --kmod zenergy
 modinfo /usr/lib/modules/"${KERNEL_VERSION}"/extra/zenergy/zenergy.ko.xz > /dev/null \
 || (find /var/cache/akmods/zenergy/ -name \*.log -print -exec cat {} \; && exit 1)
