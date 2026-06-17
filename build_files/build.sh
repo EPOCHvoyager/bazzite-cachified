@@ -16,7 +16,7 @@ if (( ${#OLD_KERNELS[@]} )); then
     rm -rf /lib/modules/*
 fi
 
-# Install kernel packages (noscripts required for 43+)
+# Install kernel packages
 dnf5 install -y \
     --enablerepo="copr:copr.fedorainfracloud.org:bieszczaders:kernel-cachyos-lto" \
     --allowerasing \
@@ -54,7 +54,9 @@ dnf5 versionlock add "kernel-cachyos-lts-lto-modules-${KERNEL_VERSION}" || true
 dracut --force \
   --no-hostonly \
   --kver "${KERNEL_VERSION}" \
-  --reproducible -v --add ostree \
+  --zstd \
+  --reproducible -v \
+  --add ostree \
   -f "/usr/lib/modules/${KERNEL_VERSION}/initramfs.img"
 
 chmod 0600 "/lib/modules/${KERNEL_VERSION}/initramfs.img"
