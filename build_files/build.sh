@@ -42,6 +42,7 @@ dnf5 install -y \
     --enablerepo="terra" \
     --setopt=tsflags=noscripts \
     akmod-zenergy-*.fc"${RELEASE}"."${ARCH}"
+mkdir -p /var/tmp
 chmod 1777 /var/tmp
 akmods --force --kernels "${KERNEL_VERSION}" --kmod zenergy
 modinfo /usr/lib/modules/"${KERNEL_VERSION}"/extra/zenergy/zenergy.ko.xz > /dev/null \
