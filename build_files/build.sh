@@ -29,6 +29,16 @@ dnf5 install -y \
 
 KERNEL_VERSION="$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' kernel-cachyos-lts-lto)"
 
+# Install zenergy. Modified from — https://github.com/ublue-os/akmods/blob/51ea18abf8439fb72eb92047aec7d43f73b555e7/build_files/extra/build-kmod-zenergy.sh
+curl -LsSf -o https://raw.githubusercontent.com/terrapkg/packages/f${VERSION}/anda/terra/release/terra.repo /etc/yum.repos.d/terra.repo
+curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
+    "https://raw.githubusercontent.com/terrapkg/packages/f${RELEASE}/anda/terra/gpg-keys/RPM-GPG-KEY-terra${RELEASE}"
+rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
+
+dnf5 install -y \
+    akmod-zenergy-*.fc"${RELEASE}"."${ARCH}"
+akmods --force --kernels "${KERNEL_VERSION}" --kmod zenergy
+
 # Generate module dependencies
 depmod -a "${KERNEL_VERSION}"
 
