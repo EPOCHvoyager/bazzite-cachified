@@ -5,7 +5,7 @@
 set ${CI:+-x} -euo pipefail
 
 # Add kernel repo
-dnf5 copr enable -y bieszczaders/kernel-cachyos-lto
+dnf5 copr enable -y bieszczaders/kernel-cachyos
 
 # Remove previous kernels
 readarray -t OLD_KERNELS < <(rpm -qa 'kernel-*')
@@ -18,16 +18,16 @@ fi
 
 # Install kernel packages
 dnf5 install -y \
-    --enablerepo="copr:copr.fedorainfracloud.org:bieszczaders:kernel-cachyos-lto" \
+    --enablerepo="copr:copr.fedorainfracloud.org:bieszczaders:kernel-cachyos" \
     --allowerasing \
     --setopt=tsflags=noscripts \
-    kernel-cachyos-lts-lto \
-    kernel-cachyos-lts-lto-devel-matched \
-    kernel-cachyos-lts-lto-devel \
-    kernel-cachyos-lts-lto-modules \
-    kernel-cachyos-lts-lto-core
+    kernel-cachyos-lts \
+    kernel-cachyos-lts-devel-matched \
+    kernel-cachyos-lts-devel \
+    kernel-cachyos-lts-modules \
+    kernel-cachyos-lts-core
 
-KERNEL_VERSION="$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' kernel-cachyos-lts-lto)"
+KERNEL_VERSION="$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' kernel-cachyos-lts)"
 
 # Install zenergy. Modified from — https://github.com/ublue-os/akmods/blob/51ea18abf8439fb72eb92047aec7d43f73b555e7/build_files/extra/build-kmod-zenergy.sh
 RELEASE="$(rpm -E '%fedora')"
@@ -61,8 +61,8 @@ if [[ -f "${VMLINUZ_SOURCE}" ]]; then
 fi
 
 # Lock kernel packages
-dnf5 versionlock add "kernel-cachyos-lts-lto-${KERNEL_VERSION}" || true
-dnf5 versionlock add "kernel-cachyos-lts-lto-modules-${KERNEL_VERSION}" || true
+dnf5 versionlock add "kernel-cachyos-lts-${KERNEL_VERSION}" || true
+dnf5 versionlock add "kernel-cachyos-lts-modules-${KERNEL_VERSION}" || true
 
 # Thank you @renner03 for this part
 dracut --force \
