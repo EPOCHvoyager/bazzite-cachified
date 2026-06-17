@@ -2,7 +2,7 @@
 
 # Modified from — https://github.com/jumpyvi/alchemist/build_files/packages/kernel.sh
 
-set -ouex pipefail
+set ${CI:+-x} -euo pipefail
 
 # Adds the longterm kernel repo
 dnf5 copr enable -y bieszczaders/kernel-cachyos-lto
