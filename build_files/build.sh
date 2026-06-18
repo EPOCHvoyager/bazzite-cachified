@@ -37,6 +37,12 @@ curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
     "https://raw.githubusercontent.com/terrapkg/packages/f${RELEASE}/anda/terra/gpg-keys/RPM-GPG-KEY-terra${RELEASE}"
 rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
 
+# Install and patch akmods package for container compatibility. Thanks to Vergil.
+dnf5 install -y \
+    akmods
+cp /usr/sbin/akmodsbuild /usr/sbin/akmodsbuild.backup
+sed -i '/if \[\[ -w \/var \]\] ; then/,/fi/d' /usr/sbin/akmodsbuild
+
 mkdir -p /var/tmp
 chmod 1777 /var/tmp
 dnf5 install -y \
