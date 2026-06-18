@@ -37,7 +37,6 @@ curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
     "https://raw.githubusercontent.com/terrapkg/packages/f${RELEASE}/anda/terra/gpg-keys/RPM-GPG-KEY-terra${RELEASE}"
 rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
 
-mkdir -p /var/roothome
 mkdir -p /var/tmp
 chmod 1777 /var/tmp
 dnf5 install -y \
