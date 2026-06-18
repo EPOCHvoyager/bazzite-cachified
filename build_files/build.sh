@@ -46,6 +46,7 @@ dnf5 install -y \
 cp /usr/sbin/akmodsbuild /usr/sbin/akmodsbuild.backup
 sed -i '/if \[\[ -w \/var \]\] ; then/,/fi/d' /usr/sbin/akmodsbuild
 
+mkdir -p /var/roothome
 mkdir -p /var/tmp
 chmod 1777 /var/tmp
 dnf5 install -y \
