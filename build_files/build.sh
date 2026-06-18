@@ -29,6 +29,12 @@ dnf5 install -y \
 
 KERNEL_VERSION="$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' kernel-cachyos-lts)"
 
+# Install and patch akmods package for container compatibility. Thanks to Vergil.
+dnf5 install -y \
+    akmods
+cp /usr/sbin/akmodsbuild /usr/sbin/akmodsbuild.backup
+sed -i '/if \[\[ -w \/var \]\] ; then/,/fi/d' /usr/sbin/akmodsbuild
+
 # Install zenergy. Modified from — https://github.com/ublue-os/akmods/blob/51ea18abf8439fb72eb92047aec7d43f73b555e7/build_files/extra/build-kmod-zenergy.sh
 RELEASE="$(rpm -E '%fedora')"
 curl -LsSf -o /etc/yum.repos.d/terra.repo \
@@ -37,15 +43,6 @@ curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
     "https://raw.githubusercontent.com/terrapkg/packages/f${RELEASE}/anda/terra/gpg-keys/RPM-GPG-KEY-terra${RELEASE}"
 rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
 
-# Install and patch akmods package for container compatibility. Thanks to Vergil.
-dnf5 install -y \
-    akmods
-cp /usr/sbin/akmodsbuild /usr/sbin/akmodsbuild.backup
-sed -i '/if \[\[ -w \/var \]\] ; then/,/fi/d' /usr/sbin/akmodsbuild
-
-mkdir -p /var/roothome
-mkdir -p /var/tmp
-chmod 1777 /var/tmp
 dnf5 install -y \
     --enablerepo="terra" \
     akmod-zenergy
@@ -57,7 +54,7 @@ modinfo /usr/lib/modules/"${KERNEL_VERSION}"/extra/zenergy/zenergy.ko.xz > /dev/
 depmod -a "${KERNEL_VERSION}"
 
 # Handle vmlinuz placement
-# Check if the files are physically different (-ef) before attempting a copy
+# Check if the files are physically different (-ef) before attempting a copy.
 VMLINUZ_SOURCE="/lib/modules/${KERNEL_VERSION}/vmlinuz"
 VMLINUZ_TARGET="/usr/lib/modules/${KERNEL_VERSION}/vmlinuz"
 
