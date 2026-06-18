@@ -77,6 +77,7 @@ dnf5 versionlock add "kernel-cachyos-lts-${KERNEL_VERSION}" || true
 dnf5 versionlock add "kernel-cachyos-lts-modules-${KERNEL_VERSION}" || true
 
 # Thank you @renner03 for this part
+export DRACUT_NO_XATTR=1
 dracut --force \
   --no-hostonly \
   --kver "${KERNEL_VERSION}" \
