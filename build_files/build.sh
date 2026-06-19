@@ -4,8 +4,11 @@
 
 set ${CI:+-x} -euo pipefail
 
+ARCH="$(rpm -E '%_arch')"
+RELEASE="$(rpm -E '%fedora')"
+
 # Add kernel repo
-dnf5 copr enable -y bieszczaders/kernel-cachyos
+dnf5 copr enable -y crono/kernel-cachyos
 
 # Remove previous kernels
 readarray -t OLD_KERNELS < <(rpm -qa 'kernel-*')
@@ -16,18 +19,21 @@ if (( ${#OLD_KERNELS[@]} )); then
     rm -rf /lib/modules/*
 fi
 
+KERNEL_NAME="kernel-cachyos-lts"
+KERNEL_VERSION="6.12.73-cachylts1.fc${RELEASE}.${ARCH}"
+
 # Install kernel packages
 dnf5 install -y \
-    --enablerepo="copr:copr.fedorainfracloud.org:bieszczaders:kernel-cachyos" \
+    --enablerepo="copr:copr.fedorainfracloud.org:crono:kernel-cachyos" \
     --allowerasing \
     --setopt=tsflags=noscripts \
-    kernel-cachyos-lts \
-    kernel-cachyos-lts-devel-matched \
-    kernel-cachyos-lts-devel \
-    kernel-cachyos-lts-modules \
-    kernel-cachyos-lts-core
+    "${KERNEL_NAME}"-"${KERNEL_VERSION}" \
+    "${KERNEL_NAME}"-devel-matched-"${KERNEL_VERSION}" \
+    "${KERNEL_NAME}"-devel-"${KERNEL_VERSION}" \
+    "${KERNEL_NAME}"-modules-"${KERNEL_VERSION}" \
+    "${KERNEL_NAME}"-core-"${KERNEL_VERSION}"
 
-KERNEL_VERSION="$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' kernel-cachyos-lts)"
+KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 
 # Install and patch akmods package for container compatibility. Thanks to Vergil.
 dnf5 install -y \
@@ -36,7 +42,6 @@ cp /usr/sbin/akmodsbuild /usr/sbin/akmodsbuild.backup
 sed -i '/if \[\[ -w \/var \]\] ; then/,/fi/d' /usr/sbin/akmodsbuild
 
 # Install zenergy. Modified from — https://github.com/ublue-os/akmods/blob/51ea18abf8439fb72eb92047aec7d43f73b555e7/build_files/extra/build-kmod-zenergy.sh
-RELEASE="$(rpm -E '%fedora')"
 curl -LsSf -o /etc/yum.repos.d/terra.repo \
     "https://raw.githubusercontent.com/terrapkg/packages/f${RELEASE}/anda/terra/release/terra.repo"
 curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
@@ -50,22 +55,22 @@ chmod 1777 /var/tmp
 
 dnf5 install -y \
     --enablerepo="terra" \
-    akmod-zenergy
+    akmod-zenergy-*.fc"${RELEASE}"."${ARCH}"
 akmods --force --kmod zenergy
-modinfo /usr/lib/modules/"${KERNEL_VERSION}"/extra/zenergy/zenergy.ko.xz > /dev/null \
+modinfo /usr/lib/modules/"${KERNEL}"/extra/zenergy/zenergy.ko.xz > /dev/null \
 || (find /var/cache/akmods/zenergy/ -name \*.log -print -exec cat {} \; && exit 1)
 
 # Generate module dependencies
-depmod -a "${KERNEL_VERSION}"
+depmod -a "${KERNEL}"
 
 # Handle vmlinuz placement
 # Check if the files are physically different (-ef) before attempting a copy.
-VMLINUZ_SOURCE="/lib/modules/${KERNEL_VERSION}/vmlinuz"
-VMLINUZ_TARGET="/usr/lib/modules/${KERNEL_VERSION}/vmlinuz"
+VMLINUZ_SOURCE="/lib/modules/${KERNEL}/vmlinuz"
+VMLINUZ_TARGET="/usr/lib/modules/${KERNEL}/vmlinuz"
 
 if [[ -f "${VMLINUZ_SOURCE}" ]]; then
     if ! [[ "${VMLINUZ_SOURCE}" -ef "${VMLINUZ_TARGET}" ]]; then
-        mkdir -p "/usr/lib/modules/${KERNEL_VERSION}"
+        mkdir -p "/usr/lib/modules/${KERNEL}"
         cp "${VMLINUZ_SOURCE}" "${VMLINUZ_TARGET}"
     else
         echo "vmlinuz already exists at target via symlink, skipping copy."
@@ -73,20 +78,20 @@ if [[ -f "${VMLINUZ_SOURCE}" ]]; then
 fi
 
 # Lock kernel packages
-dnf5 versionlock add "kernel-cachyos-lts-${KERNEL_VERSION}" || true
-dnf5 versionlock add "kernel-cachyos-lts-modules-${KERNEL_VERSION}" || true
+dnf5 versionlock add "kernel-cachyos-lts-${KERNEL}" || true
+dnf5 versionlock add "kernel-cachyos-lts-modules-${KERNEL}" || true
 
 # Thank you @renner03 for this part
 export DRACUT_NO_XATTR=1
 dracut --force \
   --no-hostonly \
-  --kver "${KERNEL_VERSION}" \
+  --kver "${KERNEL}" \
   --zstd \
   --reproducible -v \
   --add ostree \
-  -f "/usr/lib/modules/${KERNEL_VERSION}/initramfs.img"
+  -f "/usr/lib/modules/${KERNEL}/initramfs.img"
 
-chmod 0600 "/lib/modules/${KERNEL_VERSION}/initramfs.img"
+chmod 0600 "/lib/modules/${KERNEL}/initramfs.img"
 
 dnf5 clean all
 rm -f /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:bieszczaders:kernel-cachyos-lto.repo
