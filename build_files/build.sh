@@ -55,6 +55,11 @@ akmods --force --kmod zenergy
 modinfo /usr/lib/modules/"${KERNEL_VERSION}"/extra/zenergy/zenergy.ko.xz > /dev/null \
 || (find /var/cache/akmods/zenergy/ -name \*.log -print -exec cat {} \; && exit 1)
 
+# Remove builder after build
+dnf5 remove -y \
+	akmods
+rm /usr/sbin/akmodsbuild.backup
+
 # Generate module dependencies
 depmod -a "${KERNEL_VERSION}"
 
