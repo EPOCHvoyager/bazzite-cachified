@@ -91,6 +91,4 @@ dracut --force \
 
 chmod 0600 "/lib/modules/${KERNEL}/initramfs.img"
 
-dnf5 clean all
-rm -f /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:bieszczaders:kernel-cachyos-lto.repo
-rm -f /etc/yum.repos.d/terra.repo
+rm -f /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:crono:kernel-cachyos.repo
