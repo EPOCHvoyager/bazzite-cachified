@@ -5,7 +5,7 @@ set ${CI:+-x} -euo pipefail
 # Copy the contents of system_files/ of the git repo to /
 cp -avf "/ctx/system_files"/. /
 
-# Adapted from — https://github.com/jumpyvi/alchemist/build_files/packages/kernel.sh
+# Adapted from — https://github.com/jumpyvi/alchemist/blob/main/build_files/build.sh
 
 ARCH="$(rpm -E '%_arch')"
 RELEASE="$(rpm -E '%fedora')"
