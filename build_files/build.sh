@@ -53,7 +53,7 @@ chmod 1777 /var/tmp
 
 dnf5 install -y \
     --enablerepo="terra" \
-    akmod-zenergy-*.fc"${RELEASE}"."${ARCH}"
+    zenergy-kmod-*.fc"${RELEASE}"."${ARCH}"
 akmods --force --kmod zenergy
 modinfo /usr/lib/modules/"${KERNEL}"/extra/zenergy/zenergy.ko.xz > /dev/null \
 || (find /var/cache/akmods/zenergy/ -name \*.log -print -exec cat {} \; && exit 1)
